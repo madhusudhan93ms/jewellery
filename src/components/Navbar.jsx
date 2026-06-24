@@ -10,6 +10,7 @@ import {
   FiUser,
 } from 'react-icons/fi';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -28,7 +29,13 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { cartCount, wishlist } = useShop();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -70,6 +77,20 @@ export default function Navbar() {
                   {link.name}
                 </NavLink>
               ))}
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    `font-sans text-xs uppercase tracking-widest transition-colors duration-300 ${
+                      isActive
+                        ? 'text-gold font-semibold'
+                        : 'text-luxury-black hover:text-gold'
+                    }`
+                  }
+                >
+                  Admin Panel
+                </NavLink>
+              )}
             </nav>
 
             <div className="flex items-center gap-2 sm:gap-4">
@@ -107,13 +128,31 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link
-                to="/login"
-                className="hidden md:inline-flex btn-gold !px-4 !py-2 !text-xs"
-              >
-                <FiUser size={14} />
-                Login
-              </Link>
+              {user ? (
+                <div className="hidden md:flex items-center gap-3">
+                  <Link
+                    to="/profile"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gold/10 text-gold hover:bg-gold hover:text-white transition-colors"
+                    title="Profile"
+                  >
+                    <FiUser size={16} />
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="btn-outline !px-3 !py-1.5 !text-[10px] hover:border-red-500 hover:text-red-500 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="hidden md:inline-flex btn-gold !px-4 !py-2 !text-xs"
+                >
+                  <FiUser size={14} />
+                  Login
+                </Link>
+              )}
 
               <button
                 onClick={() => setMobileOpen(true)}
@@ -200,13 +239,50 @@ export default function Navbar() {
                     {link.name}
                   </NavLink>
                 ))}
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="btn-gold mt-4 text-center"
-                >
-                  Login
-                </Link>
+                {isAdmin && (
+                  <NavLink
+                    to="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `py-3 px-4 font-sans text-sm uppercase tracking-widest rounded-sm transition-colors ${
+                        isActive
+                          ? 'bg-gold/10 text-gold font-semibold'
+                          : 'text-luxury-black hover:bg-gold/5 hover:text-gold'
+                      }`
+                    }
+                  >
+                    Admin Panel
+                  </NavLink>
+                )}
+                {user ? (
+                  <div className="mt-4 flex flex-col gap-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="btn-gold text-center inline-flex items-center justify-center gap-2"
+                    >
+                      <FiUser size={14} />
+                      Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileOpen(false);
+                      }}
+                      className="btn-outline text-center w-full hover:border-red-500 hover:text-red-500 transition-colors py-2 text-xs"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="btn-gold mt-4 text-center"
+                  >
+                    Login
+                  </Link>
+                )}
               </nav>
             </motion.div>
           </>

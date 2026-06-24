@@ -1,14 +1,40 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiEye, FiEyeOff } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (form.password !== form.confirmPassword) {
+      setErrorMsg('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await register(form.name, form.email, form.phone, form.password);
+      setSuccessMsg('Account created successfully! Redirecting to login page...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (err) {
+      setErrorMsg(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -24,6 +50,18 @@ export default function Register() {
             <h1 className="font-display text-2xl mt-4 mb-2">Create Account</h1>
             <p className="font-sans text-sm text-luxury-gray">Join the VJS Jewellery family</p>
           </div>
+
+          {errorMsg && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-sm text-xs font-sans mb-5 border border-red-200 text-center">
+              {errorMsg}
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="bg-green-50 text-green-600 p-3 rounded-sm text-xs font-sans mb-5 border border-green-200 text-center">
+              {successMsg}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
@@ -92,7 +130,9 @@ export default function Register() {
               <input type="checkbox" required className="accent-gold mt-0.5" />
               I agree to the Terms & Conditions and Privacy Policy
             </label>
-            <button type="submit" className="btn-gold w-full">Create Account</button>
+            <button type="submit" disabled={loading} className="btn-gold w-full disabled:opacity-50">
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
           </form>
 
           <p className="text-center mt-6 font-sans text-sm text-luxury-gray">

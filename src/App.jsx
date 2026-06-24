@@ -12,6 +12,8 @@ import Cart from './pages/Cart';
 import Wishlist from './pages/Wishlist';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
+import Admin from './pages/Admin';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
@@ -35,6 +37,8 @@ export default function App() {
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<FAQ />} />

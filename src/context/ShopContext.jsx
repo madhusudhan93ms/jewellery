@@ -1,8 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const ShopContext = createContext();
 
 export function ShopProvider({ children }) {
+  const { user } = useAuth();
+  const [dbLoaded, setDbLoaded] = useState(false);
+
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('vjs-cart');
     return saved ? JSON.parse(saved) : [];
@@ -13,13 +17,115 @@ export function ShopProvider({ children }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Sync state from DB upon login
   useEffect(() => {
+    async function syncFromDb() {
+      if (user) {
+        try {
+          // Fetch backend cart
+          const cartRes = await fetch('/api/cart', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          });
+          const cartData = await cartRes.json();
+          const dbCart = cartData.cart || [];
+
+          // Fetch backend wishlist
+          const wishlistRes = await fetch('/api/wishlist', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+          });
+          const wishlistData = await wishlistRes.json();
+          const dbWishlist = wishlistData.wishlist || [];
+
+          // Merge local (guest) cart with DB cart
+          setCart((prevCart) => {
+            const mergedCart = [...dbCart];
+            prevCart.forEach((guestItem) => {
+              const existing = mergedCart.find((item) => item.id === guestItem.id);
+              if (existing) {
+                existing.quantity += guestItem.quantity;
+              } else {
+                mergedCart.push(guestItem);
+              }
+            });
+            // Push merged cart to DB
+            fetch('/api/cart', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.token}`
+              },
+              body: JSON.stringify({ items: mergedCart })
+            }).catch(err => console.error("Error syncing merged cart:", err));
+
+            return mergedCart;
+          });
+
+          // Merge local (guest) wishlist with DB wishlist
+          setWishlist((prevWishlist) => {
+            const mergedWishlist = [...dbWishlist];
+            prevWishlist.forEach((guestItem) => {
+              const exists = mergedWishlist.some((item) => item.id === guestItem.id);
+              if (!exists) {
+                mergedWishlist.push(guestItem);
+              }
+            });
+            // Push merged wishlist to DB
+            fetch('/api/wishlist', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.token}`
+              },
+              body: JSON.stringify({ items: mergedWishlist })
+            }).catch(err => console.error("Error syncing merged wishlist:", err));
+
+            return mergedWishlist;
+          });
+
+          setDbLoaded(true);
+        } catch (err) {
+          console.error("Error syncing cart/wishlist from DB:", err);
+          setDbLoaded(true);
+        }
+      } else {
+        // User logged out
+        setDbLoaded(false);
+        setCart([]);
+        setWishlist([]);
+      }
+    }
+
+    syncFromDb();
+  }, [user]);
+
+  // Sync state to DB on local changes
+  useEffect(() => {
+    if (user && dbLoaded) {
+      fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ items: cart })
+      }).catch((err) => console.error('Failed to sync cart update to DB:', err));
+    }
     localStorage.setItem('vjs-cart', JSON.stringify(cart));
-  }, [cart]);
+  }, [cart, user, dbLoaded]);
 
   useEffect(() => {
+    if (user && dbLoaded) {
+      fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ items: wishlist })
+      }).catch((err) => console.error('Failed to sync wishlist update to DB:', err));
+    }
     localStorage.setItem('vjs-wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
+  }, [wishlist, user, dbLoaded]);
 
   const addToCart = (product, quantity = 1) => {
     setCart((prev) => {
@@ -67,11 +173,11 @@ export function ShopProvider({ children }) {
     wishlist.some((item) => item.id === productId);
 
   const cartTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * Number(item.quantity),
     0
   );
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart.reduce((sum, item) => sum + Number(item.quantity), 0);
 
   return (
     <ShopContext.Provider

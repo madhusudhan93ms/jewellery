@@ -7,7 +7,7 @@ export default function CategoryPage({ title, subtitle, category, bannerImage })
 
   return (
     <>
-      <section className="relative h-64 md:h-80 flex items-center overflow-hidden">
+      <section className="relative h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img src={bannerImage} alt={title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-luxury-black/60" />

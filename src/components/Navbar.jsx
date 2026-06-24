@@ -61,7 +61,7 @@ export default function Navbar() {
               </span>
             </Link>
 
-            <nav className="hidden xl:flex items-center gap-6">
+            <nav className="hidden lg:flex items-center gap-6">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.path}
@@ -156,7 +156,7 @@ export default function Navbar() {
 
               <button
                 onClick={() => setMobileOpen(true)}
-                className="xl:hidden p-2 text-luxury-black hover:text-gold transition-colors"
+                className="lg:hidden p-2 text-luxury-black hover:text-gold transition-colors"
                 aria-label="Open menu"
               >
                 <FiMenu size={24} />
@@ -203,14 +203,14 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/50 z-50 xl:hidden"
+              className="fixed inset-0 bg-black/50 z-50 lg:hidden"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-cream z-50 shadow-2xl xl:hidden"
+              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-cream z-50 shadow-2xl lg:hidden"
             >
               <div className="flex items-center justify-between p-6 border-b border-gold/20">
                 <span className="font-display text-xl font-semibold">Menu</span>

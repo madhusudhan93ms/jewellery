@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FiUsers, FiDollarSign, FiShoppingBag, FiAlertOctagon,
+  FiUsers, FiDollarSign, FiShoppingBag, FiShieldAlert,
   FiUserCheck, FiUserMinus, FiPackage, FiFileText,
-  FiGrid, FiSearch, FiRefreshCw,
-  FiChevronDown, FiEye, FiPrinter, FiCheck,
+  FiTrendingUp, FiGrid, FiSearch, FiRefreshCw,
+  FiChevronDown, FiEye, FiPrinter, FiX, FiCheck,
   FiClock, FiTruck, FiAlertCircle
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
@@ -15,11 +15,11 @@ import Invoice from '../components/Invoice';
 // ─── STATUS CONFIG ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  Placed:     { color: 'bg-blue-50 text-blue-700 border-blue-200',      icon: FiClock,       next: 'Processing' },
-  Processing: { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: FiPackage,     next: 'Shipped' },
-  Shipped:    { color: 'bg-purple-50 text-purple-700 border-purple-200', icon: FiTruck,       next: 'Delivered' },
-  Delivered:  { color: 'bg-green-50 text-green-700 border-green-200',    icon: FiCheck,       next: null },
-  Cancelled:  { color: 'bg-red-50 text-red-700 border-red-200',          icon: FiAlertCircle, next: null }
+  Placed: { color: 'bg-blue-50 text-blue-700 border-blue-200', icon: FiClock, next: 'Processing' },
+  Processing: { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: FiPackage, next: 'Shipped' },
+  Shipped: { color: 'bg-purple-50 text-purple-700 border-purple-200', icon: FiTruck, next: 'Delivered' },
+  Delivered: { color: 'bg-green-50 text-green-700 border-green-200', icon: FiCheck, next: null },
+  Cancelled: { color: 'bg-red-50 text-red-700 border-red-200', icon: FiAlertCircle, next: null }
 };
 
 const ALL_STATUSES = ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
@@ -27,10 +27,10 @@ const ALL_STATUSES = ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled
 // ─── SIDEBAR NAV ─────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard',   icon: FiGrid },
-  { key: 'orders',    label: 'Orders',      icon: FiShoppingBag },
-  { key: 'customers', label: 'Customers',   icon: FiUsers },
-  { key: 'invoices',  label: 'Invoices',    icon: FiFileText }
+  { key: 'dashboard', label: 'Dashboard', icon: FiGrid },
+  { key: 'orders', label: 'Orders', icon: FiShoppingBag },
+  { key: 'customers', label: 'Customers', icon: FiUsers },
+  { key: 'invoices', label: 'Invoices', icon: FiFileText }
 ];
 
 // ─── MINI SPARKLINE ──────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ export default function Admin() {
       <div className="py-32 bg-cream min-h-screen text-center">
         <div className="page-container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <FiAlertOctagon size={64} className="mx-auto text-red-500/40 mb-6" />
+            <FiShieldAlert size={64} className="mx-auto text-red-500/40 mb-6" />
             <h1 className="font-display text-3xl mb-4 text-red-600">Access Denied</h1>
             <p className="font-sans text-base text-luxury-gray max-w-md mx-auto mb-8">
               This page requires Administrator privileges.
@@ -218,11 +218,10 @@ export default function Admin() {
         <nav className="flex-1 py-4">
           {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setActiveTab(key)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all ${
-                activeTab === key
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all ${activeTab === key
                   ? 'bg-gold/20 text-gold border-r-2 border-gold'
                   : 'text-white/60 hover:bg-white/5 hover:text-white'
-              }`}>
+                }`}>
               <Icon size={18} className="flex-shrink-0" />
               {sidebarOpen && <span className="font-sans text-sm font-medium">{label}</span>}
             </button>
@@ -385,11 +384,10 @@ export default function Admin() {
                   <div className="flex gap-2 flex-wrap">
                     {['All', ...ALL_STATUSES].map(s => (
                       <button key={s} onClick={() => setOrderStatusFilter(s)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                          orderStatusFilter === s
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${orderStatusFilter === s
                             ? 'bg-gold text-white border-gold'
                             : 'bg-white text-luxury-gray border-gray-200 hover:border-gold/50'
-                        }`}>
+                          }`}>
                         {s}
                       </button>
                     ))}
@@ -446,11 +444,10 @@ export default function Admin() {
                                   {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </td>
                                 <td className="py-4 px-4">
-                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    order.paymentMethod === 'Razorpay'
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${order.paymentMethod === 'Razorpay'
                                       ? 'bg-green-50 text-green-700 border border-green-200'
                                       : 'bg-orange-50 text-orange-700 border border-orange-200'
-                                  }`}>
+                                    }`}>
                                     {order.paymentMethod === 'Razorpay' ? '✓' : '💵'} {order.paymentMethod}
                                   </span>
                                 </td>
@@ -534,9 +531,8 @@ export default function Admin() {
                               </td>
                               <td className="py-4 px-5 text-xs text-luxury-gray">{u.phone}</td>
                               <td className="py-4 px-5">
-                                <span className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${
-                                  u.role === 'admin' ? 'bg-gold/15 text-gold' : 'bg-gray-100 text-luxury-gray'
-                                }`}>{u.role}</span>
+                                <span className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin' ? 'bg-gold/15 text-gold' : 'bg-gray-100 text-luxury-gray'
+                                  }`}>{u.role}</span>
                               </td>
                               <td className="py-4 px-5 text-xs text-luxury-gray">
                                 {new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -544,18 +540,16 @@ export default function Admin() {
                               <td className="py-4 px-5 font-semibold text-luxury-black">{userOrders.length}</td>
                               <td className="py-4 px-5 font-bold text-gold">{formatPrice(totalSpent)}</td>
                               <td className="py-4 px-5 text-center">
-                                <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase ${
-                                  u.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                                }`}>{u.status}</span>
+                                <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase ${u.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                                  }`}>{u.status}</span>
                               </td>
                               <td className="py-4 px-5 text-right">
                                 {u.role !== 'admin' ? (
                                   <button onClick={() => handleToggleUser(u.id)}
-                                    className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded border transition-colors ${
-                                      u.status === 'active'
+                                    className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded border transition-colors ${u.status === 'active'
                                         ? 'text-red-600 border-red-200 hover:bg-red-50'
                                         : 'text-green-600 border-green-200 hover:bg-green-50'
-                                    }`}>
+                                      }`}>
                                     {u.status === 'active' ? <><FiUserMinus size={12} /> Disable</> : <><FiUserCheck size={12} /> Enable</>}
                                   </button>
                                 ) : (
